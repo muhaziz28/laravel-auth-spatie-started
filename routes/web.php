@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -25,3 +26,14 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+// middleware('auth') digunakan untuk membatasi akses ke halaman ini hanya untuk user yang sudah login
+Route::middleware('auth')->group(function () {
+    Route::controller(RoleController::class)->prefix('role')->group(function () {
+        Route::get('', 'index')->name('role.index');
+        Route::get('data', 'data')->name('role.data');
+        Route::post('store', 'store')->name('role.store');
+        Route::put('update', 'update')->name('role.update');
+        Route::delete('destroy', 'destroy')->name('role.destroy');
+    });
+});
