@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -35,5 +36,12 @@ Route::middleware('auth')->group(function () {
         Route::post('store', 'store')->name('role.store');
         Route::put('update', 'update')->name('role.update');
         Route::delete('destroy', 'destroy')->name('role.destroy');
+    });
+    Route::controller(PermissionController::class)->prefix('permission')->group(function () {
+        Route::get('', 'index')->name('permission.index');
+        Route::get('data', 'data')->name('permission.data');
+        Route::post('store', 'store')->name('permission.store');
+        Route::put('update', 'update')->name('permission.update');
+        Route::delete('destroy', 'destroy')->name('permission.destroy');
     });
 });
