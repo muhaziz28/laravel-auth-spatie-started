@@ -38,7 +38,7 @@
                                     <tr>
                                         <th>No</th>
                                         <th>Role</th>
-                                        <th>Permissions</th>
+                                        <th width="30%">Permissions</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -132,11 +132,16 @@
                 {
                     data: null,
                     render: function(data, type, row) {
-                        return `<div class="flex items-center justify-end space-x-2">
+                        if (data.name != 'admin') {
+                            return `<div class="flex items-center justify-end space-x-2">
                             <button class="btn btn-sm btn-outline-success permission" data-id="${data.id}">Permission</button>
                             <button class="btn btn-sm btn-outline-primary edit" data-id="${data.id}">Edit</button>
                             <button class="btn btn-sm btn-outline-danger delete" data-id="${data.id}">Delete</button>
                         </div>`;
+                        }
+
+                        return '';
+
                     }
                 }
             ];
@@ -201,6 +206,7 @@
                     id: id
                 },
                 success: function(response) {
+                    toastr.success(response.message);
                     table.DataTable().ajax.reload();
                 }
             })
