@@ -85,6 +85,49 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modal-permission-role">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form action="{{ route('role.assignPermission') }}" method="POST" id="form-permission-role">
+                @csrf
+                <div class="modal-header">
+                    <h4 class="modal-title" id="title">Add New Role</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="role">Role Name</label>
+                        <input type="text" name="role" id="role" class="form-control" placeholder="Role Name">
+                    </div>
+                    <table id="permission-table" class="table table-bordered table-striped" style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th width="50%">Permissions</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot>
+                            <tr>
+                                <th>No</th>
+                                <th>Permissions</th>
+                                <th></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
@@ -99,31 +142,28 @@
         function defineColumns() {
             return [{
                     data: 'DT_RowIndex',
-                    class: 'table-td'
                 },
                 {
                     data: 'name',
-                    class: 'table-td'
                 },
                 {
                     data: 'permissions',
-                    class: 'table-td',
                     orderable: false,
                     render: function(data, type, row) {
                         if (data.length > 0) {
-                            let createColor = 'bg-primary-500';
-                            let readColor = 'bg-success-500';
-                            let updateColor = 'bg-warning-500';
-                            let deleteColor = 'bg-danger-500';
+                            let createColor = 'badge-primary';
+                            let readColor = 'badge-success';
+                            let updateColor = 'badge-warning';
+                            let deleteColor = 'badge-danger';
                             let colors = [createColor, readColor, updateColor, deleteColor];
                             let permissions = data.map(permission => permission.name);
                             let badge = permissions.map((permission, index) => {
-                                // return `<span class="badge ${colors[index]} text-white capitalize">${permission}</span>`;
-                                //gunakan warna random
-                                return `<span class="badge ${colors[Math.floor(Math.random() * colors.length)]} text-white">${permission}</span>`;
+                                return `<span class="badge ${colors[index % colors.length]}">${permission}</span>`;
 
                             }).join(' ');
                             return badge;
+                        } else if (row.name == 'admin') {
+                            return `<span class="badge badge-info">All Permission</span>`;
                         } else {
                             return 'No Permission';
                         }
@@ -230,6 +270,120 @@
             $('#form-add-role input[name="id"]').remove();
             $('#form-add-role').attr('action', '{{ route("role.store") }}');
             $('#form-add-role')[0].reset();
+        })
+
+        var checkedPermissions = {};
+
+        $(document).on('click', '.permission', function(e) {
+            e.preventDefault();
+            var data = table.DataTable().row($(this).closest('tr')).data();
+            console.log(data);
+            $('#modal-permission-role').modal('show');
+            $('#modal-permission-role').find('input[name="role"]').val(data.name);
+            // Memeriksa dan mencentang izin yang dimiliki oleh role pada tabel permission
+            checkRolePermissions(data);
+        });
+
+        function checkRolePermissions(roleData) {
+            var rolePermissions = roleData.permissions;
+            var permissionTable = $('#permission-table').DataTable();
+
+            permissionTable.rows().every(function() {
+                var rowData = this.data();
+                var permissionId = rowData.id;
+
+                var isPermissionOwned = rolePermissions.some(function(permission) {
+                    return permission.id === permissionId;
+                });
+
+                if (isPermissionOwned || checkedPermissions[permissionId]) {
+                    $(this.node()).find('input[type="checkbox"]').prop('checked', true);
+                    checkedPermissions[permissionId] = true;
+                } else {
+                    $(this.node()).find('input[type="checkbox"]').prop('checked', false);
+                    delete checkedPermissions[permissionId];
+                }
+            });
+        }
+
+        function defineColumns2() {
+            return [{
+                    data: 'DT_RowIndex',
+                },
+                {
+                    data: 'name',
+                },
+                {
+                    data: null,
+                    render: function(data, type, row) {
+                        var isChecked = checkedPermissions[data.id] ? 'checked' : '';
+                        return `<div class="flex items-center justify-center space-x-2">
+                            <input type="checkbox" class="form-checkbox" name="permissions[]" value="${data.id}" ${isChecked}>
+                        </div>`;
+                    }
+                }
+            ]
+        }
+
+        var table2 = $('#permission-table');
+        var config2 = {
+            parent: 'modal-permission-role',
+            ajax: "{{ route('permission.data') }}",
+            searching: true,
+            lengthChange: true,
+            lengthMenu: [10, 25, 50, 100],
+            columns: defineColumns2(),
+        };
+
+        initializeDataTable(table2, config2);
+
+        $('#permission-table').on('change', 'input[type="checkbox"]', function() {
+            var permissionId = $(this).val();
+            if ($(this).prop('checked')) {
+                checkedPermissions[permissionId] = true;
+            } else {
+                delete checkedPermissions[permissionId];
+            }
+        });
+
+        $('#form-permission-role').on('submit', function(e) {
+            e.preventDefault();
+            var permissions = Object.keys(checkedPermissions);
+            var form = new FormData(this);
+            form.append('permissions', permissions);
+            permissions.forEach(function(permission) {
+                form.append('permissions[]', permission);
+            });
+            $.ajax({
+                url: $(this).attr('action'),
+                method: "POST",
+                data: form,
+                processData: false,
+                contentType: false,
+                beforeSend: function() {
+                    $('#form-permission-role button[type="submit"]').attr('disabled', true);
+                    $('#form-permission-role button[type="submit"]').html('<iconify-icon class="text-xl spin-slow ltr:mr-2 rtl:ml-2 relative top-[1px]" icon="line-md:loading-twotone-loop"></iconify-icon><span>Loading</span>');
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#modal-permission-role').modal('hide');
+                        $('#form-permission-role')[0].reset();
+                        table.DataTable().ajax.reload();
+                        toastr.success(response.message);
+                    } else {
+                        console.log(response);
+                        toastr.error(response.message);
+                    }
+                    $('#form-permission-role button[type="submit"]').attr('disabled', false);
+                    $('#form-permission-role button[type="submit"]').html('Submit');
+                }
+            });
+        });
+
+        $('#modal-permission-role').on('hidden.bs.modal', function() {
+            $('#form-permission-role input[name="role"]').val('');
+            $('#permission-table input[type="checkbox"]').prop('checked', false);
+            checkedPermissions = {};
         })
     })
 </script>

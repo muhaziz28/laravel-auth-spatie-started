@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
         Route::post('store', 'store')->name('role.store');
         Route::put('update', 'update')->name('role.update');
         Route::delete('destroy', 'destroy')->name('role.destroy');
+        Route::post('assign-permission', 'assignPermission')->name('role.assignPermission');
     });
     Route::controller(PermissionController::class)->prefix('permission')->group(function () {
         Route::get('', 'index')->name('permission.index');
