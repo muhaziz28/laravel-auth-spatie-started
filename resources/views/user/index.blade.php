@@ -7,7 +7,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Permission</h1>
+                    <h1 class="m-0">Users</h1>
                 </div>
                 <div class="col-sm-6">
 
@@ -23,23 +23,24 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Permission</h3>
+                            <h3 class="card-title">Users</h3>
                             <div class="card-tools">
-                                @can('create-permissions')
-                                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modal-add-permission">
+                                @can('create-users')
+                                <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modal-add-user">
                                     <i class="fas fa-plus mr-2"></i>
-                                    Add New Permission
+                                    Add New User
                                 </button>
                                 @endcan
                             </div>
                         </div>
 
                         <div class="card-body">
-                            <table id="permission-table" class="table table-bordered table-striped">
+                            <table id="user-table" class="table table-bordered table-striped">
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th width="40%">Permission Name</th>
+                                        <th>Username</th>
+                                        <th width="40%">Role</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -47,7 +48,8 @@
                                 <tfoot>
                                     <tr>
                                         <th>No</th>
-                                        <th>Permission Name</th>
+                                        <th>Username</th>
+                                        <th>Role</th>
                                         <th></th>
                                     </tr>
                                 </tfoot>
@@ -60,22 +62,35 @@
     </div>
 </div>
 
-@can('create-permissions')
-<div class="modal fade" id="modal-add-permission">
+@can('create-users')
+<div class="modal fade" id="modal-add-user">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('permission.store') }}" method="POST" id="form-add-permission">
+            <form action="{{ route('user.store') }}" method="POST" id="form-add-user">
                 @csrf
                 <div class="modal-header">
-                    <h4 class="modal-title" id="title">Add New Permission</h4>
+                    <h4 class="modal-title" id="title">Add New User</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="permission">Permission Name</label>
-                        <input type="text" class="form-control" id="permission" name="permission" placeholder="Permission name">
+                        <label for="role">Role</label>
+                        <select class="form-control role-select" name="role" id="role" style="width: 100%;">
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="text" class="form-control" id="password" name="password" placeholder="Password">
                     </div>
                 </div>
                 <div class="modal-footer justify-content-between">
@@ -105,16 +120,26 @@
                 },
                 {
                     data: 'name',
-                    class: 'table-td'
+                },
+                {
+                    data: 'roles',
+                    render: function(data, type, row) {
+                        if (data.length > 0) {
+
+                            return data[0].name;
+                        } else {
+                            return '';
+                        }
+                    }
                 },
                 {
                     data: null,
                     render: function(data, type, row) {
                         return `<div class="flex items-center justify-end space-x-2">
-                        @can('update-permissions')
+                        @can('update-users')
                             <button class="btn btn-sm btn-outline-primary edit" data-id="${data.id}">Edit</button>
                         @endcan
-                        @can('delete-permissions')
+                        @can('delete-users')
                             <button class="btn btn-sm btn-outline-danger delete" data-id="${data.id}">Delete</button>
                         @endcan
                         </div>`;
@@ -123,11 +148,11 @@
             ]
         }
 
-        var table = $('#permission-table');
+        var table = $('#user-table');
         var config = {
             processing: true,
             serverSide: true,
-            ajax: "{{ route('permission.data') }}",
+            ajax: "{{ route('user.data') }}",
             paging: true,
             ordering: true,
             info: false,
@@ -140,7 +165,7 @@
 
         initializeDataTable(table, config);
 
-        $('#form-add-permission').on('submit', function(e) {
+        $('#form-add-user').on('submit', function(e) {
             e.preventDefault();
             var form = new FormData(this)
             $.ajax({
@@ -151,20 +176,20 @@
                 dataType: 'json',
                 contentType: false,
                 beforeSend: function() {
-                    $('#form-add-permission button[type="submit"]').attr('disabled', true);
-                    $('#form-add-permission button[type="submit"]').html('<iconify-icon class="text-xl spin-slow ltr:mr-2 rtl:ml-2 relative top-[1px]" icon="line-md:loading-twotone-loop"></iconify-icon><span>Loading</span>');
+                    $('#form-add-user button[type="submit"]').attr('disabled', true);
+                    $('#form-add-user button[type="submit"]').html('<iconify-icon class="text-xl spin-slow ltr:mr-2 rtl:ml-2 relative top-[1px]" icon="line-md:loading-twotone-loop"></iconify-icon><span>Loading</span>');
                 },
                 success: function(response) {
                     if (response.success) {
-                        $('#modal-add-permission').modal('hide');
-                        $('#form-add-permission')[0].reset();
+                        $('#modal-add-user').modal('hide');
+                        $('#form-add-user')[0].reset();
                         toastr.success(response.message);
                         table.DataTable().ajax.reload();
                     } else {
                         toastr.error(response.message);
                     }
-                    $('#form-add-permission button[type="submit"]').attr('disabled', false);
-                    $('#form-add-permission button[type="submit"]').html('Submit');
+                    $('#form-add-user button[type="submit"]').attr('disabled', false);
+                    $('#form-add-user button[type="submit"]').html('Submit');
                 }
 
             })
@@ -173,10 +198,10 @@
         $(document).on('click', '.delete', function() {
             var id = $(this).data('id')
             console.log(id);
-            confirm('Are you sure you want to delete this permission?');
+            confirm('Are you sure you want to delete this user?');
 
             $.ajax({
-                url: '{{ route("permission.destroy") }}',
+                url: '{{ route("user.destroy") }}',
                 method: "DELETE",
                 data: {
                     id: id
@@ -191,20 +216,48 @@
             e.preventDefault()
             var data = table.DataTable().row($(this).closest('tr')).data();
 
-            $('#modal-add-permission').modal('show');
-            $('#modal-add-permission').find('#title').text('Edit Permission');
-            $('#form-add-permission').attr('action', '{{ route("permission.update") }}');
-            $('#form-add-permission').append('<input type="hidden" name="_method" value="PUT">');
-            $('#form-add-permission').append('<input type="hidden" name="id" value="' + data.id + '">');
-            $('#permission').val(data.name);
+            $('#modal-add-user').modal('show');
+            $('#modal-add-user').find('#title').text('Edit User');
+            $('#form-add-user').attr('action', '{{ route("user.update") }}');
+            $('#form-add-user').append('<input type="hidden" name="_method" value="PUT">');
+            $('#form-add-user').append('<input type="hidden" name="id" value="' + data.id + '">');
+
+            $('#form-add-user input[name="name"]').val(data.name);
+            $('#form-add-user input[name="email"]').val(data.email);
+            // disable input password
+            $('#form-add-user input[name="password"]').attr('disabled', true);
+            var role = new Option(data.roles[0].name, data.roles[0].id, true, true);
+            $('#form-add-user .role-select').append(role).trigger('change');
+
+
         })
 
-        $('#modal-add-permission').on('hidden.bs.modal', function() {
-            $('#modal-add-permission').find('#title').text('Add Permission');
-            $('#form-add-permission input[name="_method"]').remove();
-            $('#form-add-permission input[name="id"]').remove();
-            $('#form-add-permission').attr('action', '{{ route("permission.store") }}');
-            $('#form-add-permission')[0].reset();
+        $('#modal-add-user').on('hidden.bs.modal', function() {
+            $('#modal-add-user').find('#title').text('Add User');
+            $('#form-add-user input[name="_method"]').remove();
+            $('#form-add-user input[name="id"]').remove();
+            $('#form-add-user').attr('action', '{{ route("user.store") }}');
+            $('#form-add-user')[0].reset();
+            $('#form-add-user .role-select').val(null).trigger('change');
+            $('#form-add-user input[name="password"]').attr('disabled', false);
+        })
+
+        $('.role-select').select2({
+            placeholder: 'Select a role',
+            ajax: {
+                url: '{{ route("role.data") }}',
+                dataType: 'json',
+                processResults: function(data) {
+                    return {
+                        results: data.data.map(function(role) {
+                            return {
+                                id: role.id,
+                                text: role.name
+                            }
+                        })
+                    }
+                }
+            }
         })
     })
 </script>

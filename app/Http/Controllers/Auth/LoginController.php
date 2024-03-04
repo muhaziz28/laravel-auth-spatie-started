@@ -50,7 +50,6 @@ class LoginController extends Controller
             return redirect()->back()->withErrors($validator)->withInput($request->only('email'));
         }
 
-
         $credentials = $request->only('email', 'password');
 
         if (auth()->attempt($credentials, $request->remember)) {

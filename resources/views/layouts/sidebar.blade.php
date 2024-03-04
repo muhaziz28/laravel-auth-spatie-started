@@ -38,6 +38,7 @@
                         </p>
                     </a>
                 </li>
+                @can('read-roles')
                 <li class="nav-item">
                     <a href="{{ route('role.index') }}" class="nav-link {{ request()->is('role*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -46,6 +47,8 @@
                         </p>
                     </a>
                 </li>
+                @endcan
+                @can('read-permissions')
                 <li class="nav-item">
                     <a href="{{ route('permission.index') }}" class="nav-link {{ request()->is('permission*') ? 'active' : '' }}">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
@@ -54,6 +57,17 @@
                         </p>
                     </a>
                 </li>
+                @endcan
+                @can('read-users')
+                <li class="nav-item">
+                    <a href="{{ route('user.index') }}" class="nav-link {{ request()->is('user*') ? 'active' : '' }}">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>
+                            User
+                        </p>
+                    </a>
+                </li>
+                @endcan
                 <li class="nav-item">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

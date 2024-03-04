@@ -24,12 +24,14 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Roles</h3>
+                            @can('create-roles')
                             <div class="card-tools">
                                 <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#modal-add-role">
                                     <i class="fas fa-plus mr-2"></i>
                                     Add New Role
                                 </button>
                             </div>
+                            @endcan
                         </div>
 
                         <div class="card-body">
@@ -60,6 +62,7 @@
     </div>
 </div>
 
+@can('create-roles')
 <div class="modal fade" id="modal-add-role">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -85,7 +88,9 @@
         </div>
     </div>
 </div>
+@endcan
 
+@can('assign-permissions')
 <div class="modal fade" id="modal-permission-role">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -100,7 +105,7 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="role">Role Name</label>
-                        <input type="text" name="role" id="role" class="form-control" placeholder="Role Name">
+                        <input type="text" name="role" id="role" class="form-control" readonly>
                     </div>
                     <table id="permission-table" class="table table-bordered table-striped" style="width: 100%">
                         <thead>
@@ -128,12 +133,16 @@
         </div>
     </div>
 </div>
+@endcan
+
 @endsection
+
 
 @push('scripts')
 <script>
     $.ajaxSetup({
         headers: {
+
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
@@ -174,9 +183,15 @@
                     render: function(data, type, row) {
                         if (data.name != 'admin') {
                             return `<div class="flex items-center justify-end space-x-2">
+                            @can('assign-permissions')
                             <button class="btn btn-sm btn-outline-success permission" data-id="${data.id}">Permission</button>
+                            @endcan
+                            @can('update-roles')
                             <button class="btn btn-sm btn-outline-primary edit" data-id="${data.id}">Edit</button>
+                            @endcan
+                            @can('delete-roles')
                             <button class="btn btn-sm btn-outline-danger delete" data-id="${data.id}">Delete</button>
+                            @endcan
                         </div>`;
                         }
 
