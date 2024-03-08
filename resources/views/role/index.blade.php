@@ -252,9 +252,10 @@
         $(document).on('click', '.delete', function() {
             var id = $(this).data('id')
             console.log(id);
-            confirm('Are you sure you want to delete this role?');
+            var result = confirm('Are you sure you want to delete this role?');
 
-            $.ajax({
+            if(result) {
+                $.ajax({
                 url: '{{ route("role.destroy") }}',
                 method: "DELETE",
                 data: {
@@ -265,6 +266,7 @@
                     table.DataTable().ajax.reload();
                 }
             })
+            }
         })
 
         $(document).on('click', '.edit', function(e) {
